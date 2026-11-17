@@ -189,6 +189,7 @@ section{position:relative}
 .proj{position:fixed;inset:0;z-index:85;background:var(--bg);overflow-y:auto;overscroll-behavior:contain;clip-path:inset(100% 0 0 0);visibility:hidden;transition:clip-path .9s var(--ease),visibility 0s .9s}
 .proj.open{clip-path:inset(0 0 0 0);visibility:visible;transition:clip-path .9s var(--ease),visibility 0s}
 .proj .bar{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;padding:var(--pad);background:linear-gradient(var(--bg) 60%,transparent)}
+#pCat{text-decoration:underline;text-underline-offset:3px}
 .proj .bar button:hover{color:var(--mute)}
 .proj .inner{padding:0 var(--pad) clamp(60px,8vw,120px)}
 .p-head{display:grid;grid-template-columns:1fr auto;align-items:end;gap:30px;border-bottom:1px solid var(--line);padding:4vw 0 28px}
