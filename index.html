@@ -195,7 +195,9 @@ section{position:relative}
 
 /* ---------- contact ---------- */
 .page{display:none;min-height:calc(100svh - 70px);padding-top:clamp(140px,18vh,220px) !important}
-body[data-view=about] #home,body[data-view=contact] #home{display:none}
+body[data-view=about] #home,body[data-view=contact] #home,body[data-view=technical] #home{display:none}
+body[data-view=technical] #technical{display:block}
+.tech .sec-head{padding-top:0}
 body[data-view=about] #about,body[data-view=contact] #contact{display:block}
 .nav a.on{text-decoration:underline;text-underline-offset:3px}
 .about{padding:0 var(--pad) 0}
@@ -241,7 +243,7 @@ footer button:hover,footer a:hover{color:var(--fg)}
 /* ---------- responsive ---------- */
 @media (max-width:1000px){.cards{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:820px){
-  .nav ul{gap:16px}
+  .nav ul{flex-direction:column;align-items:flex-end;gap:5px}
   .cards{grid-template-columns:1fr}
   .p-head{grid-template-columns:1fr}
   .p-gallery{grid-template-columns:1fr}
@@ -265,6 +267,7 @@ footer button:hover,footer a:hover{color:var(--fg)}
   <a href="#" class="mini" aria-label="Back to top"><span class="line">Mathies</span><span class="line">Johann</span><span class="line">Simon</span></a>
   <ul>
     <li><a href="#work" data-nav="home">Production Work</a></li>
+    <li><a href="#technical" data-nav="technical">Technical Work</a></li>
     <li><a href="#about" data-nav="about">About</a></li>
     <li><a href="#contact" data-nav="contact">Contact</a></li>
   </ul>
@@ -293,6 +296,13 @@ footer button:hover,footer a:hover{color:var(--fg)}
 </section>
 
 </main>
+
+<section class="page tech" id="technical">
+  <div class="sec-head">
+    <h2>Technical Work</h2>
+  </div>
+  <div class="cards" id="cards2"></div>
+</section>
 
 <section class="about page" id="about">
   <h2>about</h2>
@@ -350,6 +360,9 @@ const PROJECTS = [
   { id:"monstaaa", cat:"produktion", title:"Monstaaa", artist:"Badchieff", genre:"musicvideo", role:"Production Manager",
     regie:"Mischa Gurevich", prod:"Flugmodus GmbH", link:"https://www.youtube.com/watch?v=52OGmpg9nvc",
     imgs:["monstaaa-1","monstaaa-2","monstaaa-3"] },
+  { id:"nonpertutti", cat:"technik", title:"Non Per Tutti", client:"Unfair Athletics", genre:"commercial", role:"Gaffer",
+    regie:"Jan Ruckes", prod:"405curated", link:"https://www.instagram.com/p/DdM2RNnMJP_/",
+    imgs:["unfair-1","unfair-2","unfair-3","unfair-4","unfair-5"] },
 ];
 
 (()=>{
@@ -362,8 +375,7 @@ $('#yr').textContent = new Date().getFullYear();
 const waveHTML = t=>[...t].map((c,i)=>`<span class="w" style="--i:${i}">${c===' '?'&nbsp;':c}</span>`).join('');
 
 /* ---------- cards ---------- */
-const grid=$('#cards');
-grid.innerHTML = PROJECTS.filter(p=>p.cat==='produktion').map(p=>{
+const cardHTML = p=>{
   const thumb=`<div class="thumb">${p.imgs.map((n,k)=>`<i class="${k?'':'on'}" style="background-image:url(${img(n)})"></i>`).join('')}</div>`;
   const media = p.link
     ? `<a class="media" href="${p.link}" target="_blank" rel="noopener" data-cursor="${p.role} · Watch video">${thumb}</a>`
@@ -372,13 +384,15 @@ grid.innerHTML = PROJECTS.filter(p=>p.cat==='produktion').map(p=>{
     ${media}
     <div class="meta">
       <div class="info">
-        <button type="button" class="t" data-open="${p.id}">${p.title}${p.artist?` by ${p.artist}`:''}${p.genre?` <span class="g">(${p.genre})</span>`:''}</button>
+        <button type="button" class="t" data-open="${p.id}">${p.title}${p.artist?` by ${p.artist}`:''}${p.client?` for ${p.client}`:''}${p.genre?` <span class="g">(${p.genre})</span>`:''}</button>
         <span class="sub">${p.regie} · ${p.prod}</span>
         <span class="role-touch">${p.role}</span>
       </div>
       <button type="button" class="details" data-open="${p.id}">Details</button>
     </div>
-  </div>`;}).join('');
+  </div>`;};
+$('#cards').innerHTML = PROJECTS.filter(p=>p.cat==='produktion').map(cardHTML).join('');
+$('#cards2').innerHTML = PROJECTS.filter(p=>p.cat==='technik').map(cardHTML).join('');
 
 /* flip through stills while hovering a card */
 $$('.card[data-id]').forEach(c=>{
@@ -492,7 +506,7 @@ function openProj(id){
   const same=PROJECTS.filter(x=>x.cat===p.cat); const idx=same.indexOf(p);
   current=p;
   $('#pCat').textContent = p.cat==='produktion'?'Production Work':'Technical Work';
-  $('#pTitle').innerHTML = p.title + (p.artist?` by ${p.artist}`:'') + (p.genre?` <span class="g">(${p.genre})</span>`:'');
+  $('#pTitle').innerHTML = p.title + (p.artist?` by ${p.artist}`:'') + (p.client?` for ${p.client}`:'') + (p.genre?` <span class="g">(${p.genre})</span>`:'');
   $('#pCredits').innerHTML = `<dt>Director</dt><dd>${p.regie}</dd><dt>Production</dt><dd>${p.prod}</dd><dt>Role</dt><dd>${p.role}</dd>`
     + (p.link?`<a class="watch" href="${p.link}" target="_blank" rel="noopener" >Watch video</a>`:'');
   $('#pGallery').innerHTML = p.imgs.map((n,k)=>`<figure><img src="${img(n)}" alt="${p.title} – Still ${k+1}"><figcaption>${p.title.toUpperCase()} · ${pad(k+1)}</figcaption></figure>`).join('');
@@ -510,7 +524,7 @@ $('#pNext').addEventListener('click',e=>{const id=e.currentTarget.dataset.id;pro
 /* ---------- views: home / about / contact ---------- */
 function route(){
   const h=location.hash.slice(1);
-  const view=(h==='about'||h==='contact')?h:'home';
+  const view=(h==='about'||h==='contact'||h==='technical')?h:'home';
   const changed=document.body.dataset.view!==view;
   document.body.dataset.view=view;
   $$('[data-nav]').forEach(a=>a.classList.toggle('on',a.dataset.nav===view&&view!=='home'));
