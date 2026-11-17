@@ -151,7 +151,11 @@ section{position:relative}
 .intro-txt p{font-size:clamp(26px,3.4vw,52px);line-height:1.18;letter-spacing:-.02em;font-weight:500}
 .intro-txt a{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.12em;transition:color .3s}
 .intro-txt a:hover{color:var(--accent)}
-.card .media{display:block;width:100%}
+.card .media{display:block;width:100%;position:relative;cursor:pointer}
+.card .play{position:absolute;left:50%;top:50%;width:62px;height:62px;margin:-31px 0 0 -31px;border-radius:50%;border:1px solid rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;color:#fff;z-index:2;
+  background:rgba(0,0,0,.08);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);transition:transform .45s var(--ease),background .3s,color .3s}
+.card .play svg{width:13px;height:15px;margin-left:3px;fill:currentColor}
+.card .play:hover{transform:scale(1.12);background:#fff;color:var(--fg)}
 .card .t{text-align:left}
 .g{color:var(--mute)}
 .card .t:hover{text-decoration:underline}
@@ -392,8 +396,8 @@ const waveHTML = t=>[...t].map((c,i)=>`<span class="w" style="--i:${i}">${c===' 
 const cardHTML = p=>{
   const thumb=`<div class="thumb">${p.imgs.map((n,k)=>`<i class="${k?'':'on'}" style="background-image:url(${img(n)})"></i>`).join('')}</div>`;
   const media = p.link
-    ? `<a class="media" href="${p.link}" target="_blank" rel="noopener" data-cursor="${p.role} · Watch video">${thumb}</a>`
-    : `<button class="media" type="button" data-open="${p.id}" data-cursor="${p.role}">${thumb}</button>`;
+    ? `<div class="media" role="button" tabindex="0" data-open="${p.id}" data-cursor="${p.role} · Details">${thumb}<a class="play" href="${p.link}" target="_blank" rel="noopener" aria-label="Watch video" data-cursor="${p.role} · Watch video"><svg viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0L10 6L0 12Z"/></svg></a></div>`
+    : `<button class="media" type="button" data-open="${p.id}" data-cursor="${p.role} · Details">${thumb}</button>`;
   return `<div class="card" data-id="${p.id}">
     ${media}
     <div class="meta">
@@ -414,7 +418,9 @@ $$('.card[data-id]').forEach(c=>{
   m.addEventListener('pointerenter',()=>{clearInterval(t);t=setInterval(()=>{fr[k].classList.remove('on');k=(k+1)%fr.length;fr[k].classList.add('on')},700)});
   m.addEventListener('pointerleave',()=>{clearInterval(t);fr[k].classList.remove('on');k=0;fr[0].classList.add('on')});
 });
-$$('[data-open]').forEach(b=>b.addEventListener('click',()=>openProj(b.dataset.open)));
+$$('[data-open]').forEach(b=>{b.addEventListener('click',()=>openProj(b.dataset.open));
+  if(b.tagName==='DIV')b.addEventListener('keydown',e=>{if(e.target===b&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openProj(b.dataset.open)}})});
+$$('.card .play').forEach(a=>a.addEventListener('click',e=>e.stopPropagation()));
 
 /* ---------- logo letters ---------- */
 /* Größe pro Buchstabe (1 = normal) – hier lassen sich die Proportionen fein einstellen */
