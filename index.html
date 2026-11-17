@@ -180,8 +180,7 @@ section{position:relative}
 .p-title-clip{overflow:hidden;padding-top:.04em}
 .proj.open .p-title .w{transform:none}
 .credits{display:grid;grid-template-columns:auto auto;gap:6px 26px;min-width:280px}
-.credits dt{color:var(--mute)}
-.credits .role{color:var(--fg)}
+.credits dt,.credits dd{color:var(--mute)}
 .watch{margin-top:14px;grid-column:1/-1;justify-self:start;text-decoration:underline;text-underline-offset:3px}
 .watch:hover{color:var(--mute)}
 .p-gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,2vw,26px);padding-top:clamp(24px,3vw,44px)}
@@ -494,7 +493,7 @@ function openProj(id){
   current=p;
   $('#pCat').textContent = p.cat==='produktion'?'Production Work':'Technical Work';
   $('#pTitle').innerHTML = p.title + (p.artist?` by ${p.artist}`:'') + (p.genre?` <span class="g">(${p.genre})</span>`:'');
-  $('#pCredits').innerHTML = `<dt>Role</dt><dd class="role">${p.role}</dd><dt>Director</dt><dd>${p.regie}</dd><dt>Production</dt><dd>${p.prod}</dd>`
+  $('#pCredits').innerHTML = `<dt>Director</dt><dd>${p.regie}</dd><dt>Production</dt><dd>${p.prod}</dd><dt>Role</dt><dd>${p.role}</dd>`
     + (p.link?`<a class="watch" href="${p.link}" target="_blank" rel="noopener" >Watch video</a>`:'');
   $('#pGallery').innerHTML = p.imgs.map((n,k)=>`<figure><img src="${img(n)}" alt="${p.title} – Still ${k+1}"><figcaption>${p.title.toUpperCase()} · ${pad(k+1)}</figcaption></figure>`).join('');
   const next = same[(idx+1)%same.length];
