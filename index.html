@@ -67,6 +67,8 @@ img{display:block;max-width:100%}
 /* ---------- nav ---------- */
 .nav{position:fixed;top:0;left:0;right:0;z-index:80;display:flex;justify-content:space-between;align-items:flex-start;padding:var(--pad);mix-blend-mode:difference;color:#fff;font-size:13px}
 .mini{font-family:var(--display);font-weight:900;font-size:19px;line-height:.84;text-transform:uppercase;display:block;text-align:left;user-select:none}
+.mini{transition:opacity .35s}
+.nav .mini.away{opacity:0;pointer-events:none}
 .mini .line{display:block;white-space:nowrap;letter-spacing:0}
 .mini .line:nth-child(2){font-size:.6em;padding-left:.95em;line-height:.9}
 .mini .ch,.mini .in{display:inline-block;vertical-align:baseline}
@@ -415,12 +417,29 @@ const cardHTML = p=>{
 $('#cards').innerHTML = PROJECTS.filter(p=>p.cat==='produktion').map(cardHTML).join('');
 $('#cards2').innerHTML = PROJECTS.filter(p=>p.cat==='technik').map(cardHTML).join('');
 
-/* flip through stills while hovering a card */
-$$('.card[data-id]').forEach(c=>{
-  const fr=[...c.querySelectorAll('.thumb i')]; let k=0,t=null; const m=c.querySelector('.media');
-  m.addEventListener('pointerenter',()=>{clearInterval(t);t=setInterval(()=>{fr[k].classList.remove('on');k=(k+1)%fr.length;fr[k].classList.add('on')},700)});
-  m.addEventListener('pointerleave',()=>{clearInterval(t);fr[k].classList.remove('on');k=0;fr[0].classList.add('on')});
-});
+/* Stills durchblättern – immer nur EINE Karte: die unter der Maus (am Handy: die in der Bildschirmmitte).
+   Wird auch beim Scrollen neu geprüft, damit keine Karten „hängen bleiben“ und gleichzeitig flackern. */
+let act=null,fk=0,ft2=null,px=-1,py=-1;
+function setAct(c){
+  if(c===act)return;
+  clearInterval(ft2);
+  if(act){const f=[...act.querySelectorAll('.thumb i')];f.forEach(i=>i.classList.remove('on'));if(f[0])f[0].classList.add('on')}
+  act=c;fk=0;
+  if(act&&!RM){const f=[...act.querySelectorAll('.thumb i')];if(f.length>1)ft2=setInterval(()=>{f[fk].classList.remove('on');fk=(fk+1)%f.length;f[fk].classList.add('on')},700)}
+}
+function pick(){
+  if(FINE){const el=px<0?null:document.elementFromPoint(px,py);const m=el&&el.closest('.card .media');setAct(m?m.closest('.card'):null)}
+  else{const mid=innerHeight/2;let best=null,bd=1e9;
+    $$('.card[data-id]').forEach(c=>{if(!c.offsetParent)return;const r=c.querySelector('.thumb').getBoundingClientRect();if(r.bottom<0||r.top>innerHeight)return;const d=Math.abs((r.top+r.bottom)/2-mid);if(d<bd){bd=d;best=c}});
+    setAct(best)}
+}
+if(FINE){
+  addEventListener('pointermove',e=>{px=e.clientX;py=e.clientY;pick()},{passive:true});
+  document.documentElement.addEventListener('mouseleave',()=>{px=-1;pick()});
+}
+addEventListener('scroll',pick,{passive:true});
+addEventListener('hashchange',()=>requestAnimationFrame(pick));
+if(!FINE)pick();
 $$('[data-open]').forEach(b=>{b.addEventListener('click',()=>openProj(b.dataset.open));
   if(b.tagName==='DIV')b.addEventListener('keydown',e=>{if(e.target===b&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openProj(b.dataset.open)}})});
 $$('.card .play').forEach(a=>a.addEventListener('click',e=>e.stopPropagation()));
@@ -567,6 +586,18 @@ bg.addEventListener('click',e=>{e.stopPropagation();setMenu(!nav.classList.conta
 $$('.nav ul a').forEach(a=>a.addEventListener('click',()=>setMenu(false)));
 addEventListener('click',e=>{if(!nav.contains(e.target))setMenu(false)});
 addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false)});
+
+/* ---------- kleines Logo ausblenden, sobald es über die Projekte laufen würde ---------- */
+const mini=$('.mini');
+function miniCheck(){
+  const b=mini.getBoundingClientRect().bottom+8;
+  const hit=$$('.cards').some(g=>{if(!g.offsetParent)return false;const r=g.getBoundingClientRect();return r.top<b&&r.bottom>0});
+  mini.classList.toggle('away',hit);
+}
+addEventListener('scroll',miniCheck,{passive:true});
+addEventListener('resize',miniCheck);
+addEventListener('hashchange',()=>requestAnimationFrame(miniCheck));
+miniCheck();
 
 /* ---------- copy + impressum ---------- */
 const imp=$('#imp');
